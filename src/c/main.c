@@ -7,6 +7,7 @@
 #define PERSIST_SECOND_HAND   5
 #define PERSIST_ACTIVITY      6
 #define PERSIST_TRACKER_FONT  7
+#define PERSIST_DISTANCE_UNITS 8
 
 #define TAP_DEBOUNCE_SECONDS  2
 
@@ -38,6 +39,7 @@ static bool s_transparent_hands;
 static bool s_second_hand_enabled;
 static ActivityType s_activity;
 static bool s_large_font;
+static bool s_distance_kilometers;
 
 static int s_hours, s_minutes, s_seconds;
 static int s_heart_rate;
@@ -92,8 +94,15 @@ static void update_activity_display(void) {
         }
         case ACT_DISTANCE: {
             int m = health_sum_today(HealthMetricWalkedDistanceMeters);
-            snprintf(s_tracker_buf, sizeof(s_tracker_buf), "%d.%d km",
-                     m / 1000, (m % 1000) / 100);
+            if (s_distance_kilometers) {
+                int km_tenths = m / 100;
+                snprintf(s_tracker_buf, sizeof(s_tracker_buf), "%d.%d km",
+                         km_tenths / 10, km_tenths % 10);
+            } else {
+                int mi_tenths = (m * 10) / 1609;
+                snprintf(s_tracker_buf, sizeof(s_tracker_buf), "%d.%d mi",
+                         mi_tenths / 10, mi_tenths % 10);
+            }
             break;
         }
         case ACT_HEART_RATE: {
@@ -166,6 +175,8 @@ static void load_settings(void) {
         (ActivityType)persist_read_int(PERSIST_ACTIVITY) : ACT_STEPS;
     s_large_font = persist_exists(PERSIST_TRACKER_FONT) ?
         (persist_read_int(PERSIST_TRACKER_FONT) != 0) : false;
+    s_distance_kilometers = persist_exists(PERSIST_DISTANCE_UNITS) ?
+        (persist_read_int(PERSIST_DISTANCE_UNITS) != 0) : false;
     if (s_activity >= NUM_ACTIVITIES) s_activity = ACT_STEPS;
 }
 
@@ -434,6 +445,12 @@ static void inbox_received(DictionaryIterator *iter, void *context) {
         s_large_font = (atoi(t->value->cstring) == 1);
         persist_write_int(PERSIST_TRACKER_FONT, s_large_font ? 1 : 0);
         apply_tracker_font();
+    }
+
+    t = dict_find(iter, MESSAGE_KEY_DISTANCE_UNITS);
+    if (t) {
+        s_distance_kilometers = (atoi(t->value->cstring) == 1);
+        persist_write_int(PERSIST_DISTANCE_UNITS, s_distance_kilometers ? 1 : 0);
     }
 
     apply_colors();
