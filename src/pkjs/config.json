@@ -1,7 +1,7 @@
 [
   {
     "type": "heading",
-    "defaultValue": "Pear Hermit Settings"
+    "defaultValue": "Pear Hermit CA Settings"
   },
   {
     "type": "section",
@@ -70,6 +70,21 @@
         "options": [
           { "label": "Miles",      "value": "0" },
           { "label": "Kilometers", "value": "1" }
+        ]
+      },
+      {
+        "type": "select",
+        "messageKey": "ACTIVITY",
+        "label": "Activity Type",
+        "defaultValue": "0",
+        "options": [
+          { "label": "Steps",      "value": "0" },
+          { "label": "Active Minutes", "value": "1" },
+          { "label": "Calories", "value": "2" },
+          { "label": "Distance", "value": "3" },
+          { "label": "Heart Rate", "value": "4" },
+          { "label": "Battery", "value": "5" },
+          { "label": "Digital Time", "value": "6" }
         ]
       }
     ]
